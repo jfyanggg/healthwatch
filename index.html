@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>Pantry Ledger</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -38,6 +38,7 @@
   html {
     scroll-padding-top: env(safe-area-inset-top, 0px);
     -webkit-text-size-adjust: 100%;
+    touch-action: pan-y;
   }
   body {
     margin: 0;
@@ -49,6 +50,7 @@
     min-height: 100%;
     -webkit-font-smoothing: antialiased;
     overscroll-behavior-y: none;
+    touch-action: pan-y;
   }
   button {
     touch-action: manipulation;
@@ -471,6 +473,7 @@
 
 <script>
 (function() {
+  document.addEventListener('gesturestart', function(e) { e.preventDefault(); });
   var STORE_KEY = 'pantry-ledger-data-v1';
   var DEFAULT_TARGETS = { calories: 2000, protein: 190, fiber: 30 };
 
