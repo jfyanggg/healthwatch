@@ -19,23 +19,25 @@
     --fiber: #9A9A9E;
     --calorie: #FFFFFF;
     --over: #A85248;
+    --good: #5FA463;
     --radius: 14px;
   }
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) {
       --bg: #101012; --bg-elevated: #1B1B1E; --paper: #F5F0E6; --ink: #F2F2F0;
       --ink-dim: #86868B; --line: #2A2A2E; --protein: #E7E7E5; --fiber: #9A9A9E;
-      --calorie: #FFFFFF; --over: #A85248;
+      --calorie: #FFFFFF; --over: #A85248; --good: #5FA463;
     }
   }
   :root[data-theme="dark"] {
     --bg: #101012; --bg-elevated: #1B1B1E; --paper: #F5F0E6; --ink: #F2F2F0;
     --ink-dim: #86868B; --line: #2A2A2E; --protein: #E7E7E5; --fiber: #9A9A9E;
-    --calorie: #FFFFFF; --over: #A85248;
+    --calorie: #FFFFFF; --over: #A85248; --good: #5FA463;
   }
-  * { box-sizing: border-box; }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html {
     scroll-padding-top: env(safe-area-inset-top, 0px);
+    -webkit-text-size-adjust: 100%;
   }
   body {
     margin: 0;
@@ -46,6 +48,12 @@
     padding-bottom: env(safe-area-inset-bottom, 0px);
     min-height: 100%;
     -webkit-font-smoothing: antialiased;
+    overscroll-behavior-y: none;
+  }
+  button {
+    touch-action: manipulation;
+    -webkit-user-select: none;
+    user-select: none;
   }
   .wrap {
     max-width: 560px;
@@ -124,7 +132,8 @@
     stroke-linecap: round;
     stroke-dasharray: 301.59;
     stroke-dashoffset: 301.59;
-    transition: stroke-dashoffset 0.7s cubic-bezier(.22,1.1,.36,1), stroke 0.3s;
+    will-change: stroke-dashoffset;
+    transition: stroke-dashoffset 0.6s cubic-bezier(.32,.94,.4,1), stroke 0.3s;
   }
   .ring-center {
     position: absolute;
@@ -156,6 +165,7 @@
   }
 
   .sticky-top {
+    position: -webkit-sticky;
     position: sticky;
     top: env(safe-area-inset-top, 0px);
     background: var(--bg);
@@ -197,6 +207,7 @@
     font-size: 0.85rem;
     color: var(--ink-dim);
     list-style: none;
+    touch-action: manipulation;
   }
   details.entry-details summary::-webkit-details-marker { display: none; }
   details.entry-details summary::before {
@@ -241,9 +252,11 @@
     border-radius: 8px;
     padding: 10px 11px;
     font-family: 'IBM Plex Sans', sans-serif;
-    font-size: 0.92rem;
+    font-size: 16px;
     width: 100%;
     font-variant-numeric: tabular-nums;
+    -webkit-appearance: none;
+    appearance: none;
   }
   input::placeholder { color: var(--ink-dim); opacity: 0.8; }
   .field-label {
@@ -314,6 +327,7 @@
     font-size: 0.82rem;
     color: var(--ink-dim);
     list-style: none;
+    touch-action: manipulation;
   }
   details.targets summary::-webkit-details-marker { display: none; }
   details.targets summary::before {
@@ -535,11 +549,11 @@
 
   var RING_CIRC = 301.59; // 2 * PI * r(48)
 
-  function setRing(el, value, target, colorVar, overOk) {
+  function setRing(el, value, target, colorVar, reachedColorVar) {
     var p = pct(value, target);
     el.style.strokeDashoffset = RING_CIRC * (1 - p / 100);
-    var over = overOk && target > 0 && value > target;
-    el.setAttribute('stroke', over ? 'var(--over)' : 'var(' + colorVar + ')');
+    var reached = target > 0 && value >= target;
+    el.setAttribute('stroke', reached ? 'var(' + reachedColorVar + ')' : 'var(' + colorVar + ')');
   }
 
   function renderJars() {
@@ -549,15 +563,15 @@
 
     document.getElementById('numCal').textContent = Math.round(t.calories).toLocaleString();
     document.getElementById('targetCalLabel').textContent = '/ ' + targets.calories.toLocaleString();
-    setRing(document.getElementById('fillCal'), t.calories, targets.calories, '--calorie', true);
+    setRing(document.getElementById('fillCal'), t.calories, targets.calories, '--calorie', '--over');
 
     document.getElementById('numProtein').textContent = Math.round(t.protein) + 'g';
     document.getElementById('targetProteinLabel').textContent = '/ ' + targets.protein + 'g';
-    setRing(document.getElementById('fillProtein'), t.protein, targets.protein, '--protein', false);
+    setRing(document.getElementById('fillProtein'), t.protein, targets.protein, '--protein', '--good');
 
     document.getElementById('numFiber').textContent = Math.round(t.fiber) + 'g';
     document.getElementById('targetFiberLabel').textContent = '/ ' + targets.fiber + 'g';
-    setRing(document.getElementById('fillFiber'), t.fiber, targets.fiber, '--fiber', false);
+    setRing(document.getElementById('fillFiber'), t.fiber, targets.fiber, '--fiber', '--good');
   }
 
   function renderLog() {
